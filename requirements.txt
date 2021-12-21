@@ -1,0 +1,9 @@
+Pillow
+flask
+flask-cors
+Flask-Caching
+flask_login
+requests
+beautifulsoup4
+pywebview
+lxml
