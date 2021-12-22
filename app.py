@@ -38,6 +38,7 @@ def find_logo(domain):
     
     response = get_url_content(home)
     data = get_logos(response)
+    print(getScores(data))
     response = app.response_class(
         response=json.dumps(data),
         mimetype='application/json'
@@ -168,3 +169,30 @@ def get_logos(response):
 
 
     return arrayLogos
+
+
+def getScores(arrayLogos):
+    result_scores= {}
+
+    scores = {
+        "url_class_logo_in_parents": 1,
+        "url_json_ld_logo": 10,
+        "url_manifest_image": 5,
+        "apple-touch-icon": 3,
+        "url_src_contains_logo": 2,
+        "url_og_logo": 4,
+        "url_favicon_html": 3
+    }
+    for item in arrayLogos:
+        image = item["image"]
+    
+            
+        if image:
+            score = scores[image["type"]]
+            url = image["url"]
+
+            if url in result_scores:
+                result_scores[url] = result_scores[url] + score
+            else:
+                result_scores[url] = score
+    print(result_scores)
