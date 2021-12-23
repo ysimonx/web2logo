@@ -10,6 +10,7 @@ from urllib.parse import urljoin
 import json
 import re
 import webview
+import operator
 
 app = Flask(__name__)
 
@@ -31,16 +32,35 @@ def hello():
 
 
 @app.route('/logo/<domain>', methods=('GET', 'POST'))
-@cache.cached(timeout=27)
+@cache.cached(timeout=10)
 def find_logo(domain):
     home = 'https://%s/' % (domain)  
-    print(home)
+    
+    #print(home)
     
     response = get_url_content(home)
-    data = get_logos(response)
-    print(getScores(data))
+
+    logos = get_logos(response)
+    
+    logos_downloaded = getDownloads(logos)
+
+    logos_scored = getScores(logos_downloaded)
+
+    
+
+    if len(logos_scored) > 0:
+        print(logos_scored[0])
+        if not request.args.get('debug'): 
+            return redirect(logos_scored[0]["image"]["url"], code=302)
+
+    result= {
+        "logo": logos_scored[0]["image"]["url"],
+        "logos_details": logos,
+        "logos_scores": logos_scored
+        
+    }
     response = app.response_class(
-        response=json.dumps(data),
+        response=json.dumps(result),
         mimetype='application/json'
     )
     return response
@@ -73,17 +93,23 @@ def get_url_content(url):
     
 
 def get_image(url):
+    print("url image = " + url )
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"}
     response = requests.get(url, headers=headers)
-    image_bytes = io.BytesIO(response.content)
-    img = Image.open(image_bytes)
-
-    return img
+    if response.status_code == 200:
+        image_bytes = io.BytesIO(response.content)
+        try:
+            img = Image.open(image_bytes)
+        except:
+            print("erreur sur chargement image ", url)
+            return None
+        # print(img)
+        return img
+    else:
+        return None
 
 def scrap_URLImages(items, attribute, type, base_url):
-    if (type == "class_contains_logo"):
-        print("test") 
-        print(items)
+       
     dict=[]
     for item in items:
 
@@ -122,9 +148,7 @@ def get_logos(response):
         # print("manifest ! ", urljoin(base_url, url_manifest['href']))
         response_manifest = get_url_content(urljoin(base_url, url_manifest['href']))
         js = json.loads(response_manifest.content)
-        print(js["icons"])
         for icon in js["icons"]:
-            print(icon["src"])
             arrayLogos.append({ "image": {"type": "url_manifest_image",  "url": urljoin(base_url,icon["src"]) }})
 
 
@@ -170,6 +194,31 @@ def get_logos(response):
 
     return arrayLogos
 
+def getDownloads(arrayLogos):
+    result_size = {}
+
+    result= []
+    for item in arrayLogos:
+        item_image = item["image"]
+        if item_image:
+            url = item_image["url"]
+            #print(url)
+            image_downloaded = get_image(url)
+            if (image_downloaded):
+                result_size[url] = image_downloaded.size
+
+    
+    for item in arrayLogos:
+        item_image = item["image"]
+        if item_image:
+            url = item_image["url"]
+            if url in result_size:
+                 width, height = result_size[url]
+                 item["width"] = width
+                 item["height"] = height
+                 result.append(item)
+
+    return result
 
 def getScores(arrayLogos):
     result_scores= {}
@@ -181,11 +230,13 @@ def getScores(arrayLogos):
         "apple-touch-icon": 3,
         "url_src_contains_logo": 2,
         "url_og_logo": 4,
-        "url_favicon_html": 3
+        "url_favicon_html": 2,
+        "class_contains_logo": 3, 
+        "url_rss_image": 5
     }
+    
     for item in arrayLogos:
         image = item["image"]
-    
             
         if image:
             score = scores[image["type"]]
@@ -195,4 +246,36 @@ def getScores(arrayLogos):
                 result_scores[url] = result_scores[url] + score
             else:
                 result_scores[url] = score
-    print(result_scores)
+
+    
+
+    # dedoublonne
+    result_dict= dict()
+    for item in arrayLogos:
+        image = item["image"]
+        if image:
+            url = image["url"]
+            item["score"] =  result_scores[url]
+        result_dict[url] = item
+    result=[]
+    for key in result_dict:
+        result.append(result_dict[key])
+
+    # pondere score en fonction des dimensions
+    result_pondere = []
+    for item in result:
+        if item["width"] and item["height"]:
+            if item["width"]<80 or item["height"]<80:
+                item["score"] = item["score"] / 2
+            if item["width"]>130 and item["height"]>130:
+                item["score"] = item["score"] * 2
+            
+        else:
+            score = 0
+            
+        result_pondere.append(item)
+
+    # tri desc
+    result_scores_sorted = sorted(result_pondere, key=operator.itemgetter("score"), reverse=True)
+
+    return result_scores_sorted
