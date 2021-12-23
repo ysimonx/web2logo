@@ -11,6 +11,8 @@ import json
 import re
 import webview
 import operator
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -201,11 +203,20 @@ def getDownloads(arrayLogos):
     for item in arrayLogos:
         item_image = item["image"]
         if item_image:
-            url = item_image["url"]
-            #print(url)
-            image_downloaded = get_image(url)
-            if (image_downloaded):
-                result_size[url] = image_downloaded.size
+            try:
+                url = item_image["url"]
+                print(url)
+                if url.startswith("data:"):
+                    contentbase64= re.sub("data:image\/gif,","",url)
+                    print(contentbase64)
+                    image_downloaded = Image.open(BytesIO(base64.b64decode(contentbase64)))
+                else:
+                    image_downloaded = get_image(url)
+
+                if (image_downloaded):
+                    result_size[url] = image_downloaded.size
+            except:
+                a=1
 
     
     for item in arrayLogos:
@@ -269,7 +280,8 @@ def getScores(arrayLogos):
                 item["score"] = item["score"] / 2
             if item["width"]>130 and item["height"]>130:
                 item["score"] = item["score"] * 2
-            
+            if item["width"]>400 and item["height"]>400:
+                item["score"] = item["score"] * 2
         else:
             score = 0
             
