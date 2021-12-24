@@ -43,20 +43,25 @@ def find_logo(domain):
     response = get_url_content(home)
 
     logos = get_logos(response)
-    
+ 
     logos_downloaded = getDownloads(logos)
-
+   
     logos_scored = getScores(logos_downloaded)
 
-    
 
     if len(logos_scored) > 0:
         print(logos_scored[0])
         if not request.args.get('debug'): 
             return redirect(logos_scored[0]["image"]["url"], code=302)
 
+    if len(logos_scored) > 0:
+
+        choosen_logo = logos_scored[0]["image"]["url"]
+    else:
+        choosen_logo = ""
+
     result= {
-        "logo": logos_scored[0]["image"]["url"],
+        "logo": choosen_logo,
         "logos_details": logos,
         "logos_scores": logos_scored
         
@@ -136,13 +141,15 @@ def get_logos(response):
 
     arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("link", rel="icon"), "href" ,"url_favicon_html",        base_url )
     arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("meta", property="og:logo"), "content" ,"url_og_logo",  base_url )
-    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("meta", property="og:image"), "content" ,"url_og_logo", base_url )
+    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("meta", property="og:image"), "content" ,"url_og_image", base_url )
     arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", itemprop="logo"), "src" ,"url_schema_org",       base_url )
     arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("meta", property="twitter:image"), "content" ,"url_twitter_image",       base_url )
-    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", {"src":    re.compile(".*logo.*")}), "src" ,"url_src_contains_logo",       base_url )
-    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", {"class" : re.compile('.*logo.*')}), "src" ,"class_contains_logo",       base_url )
-    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("svg", {"class" : re.compile('.*logo.*')}), "src" ,"svg_class_contains_logo",       base_url )
+    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", {"src":    re.compile("(?i).*logo.*")}), "src" ,"url_src_contains_logo",       base_url )
+    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", {"class" : re.compile('(?i).*logo.*')}), "src" ,"class_contains_logo",       base_url )
+    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("svg", {"class" : re.compile('(?i).*logo.*')}), "src" ,"svg_class_contains_logo",       base_url )
     arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("link", rel="apple-touch-icon"), "href", "apple-touch-icon",  base_url)
+    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", {"alt" : re.compile('(?i).*logo.*')}), "src", "alt_contains_logo",  base_url)
+    arrayLogos = arrayLogos + scrap_URLImages(soup.findAll("img", {"alt" : re.compile('(?i).*logo.*')}), "src", "alt_contains_logo",  base_url)
  
 
     url_manifest = soup.find("link", rel="manifest")
@@ -168,7 +175,7 @@ def get_logos(response):
     for item in soup.findAll('script', {'type':'application/ld+json'}):
 
             tab_json=[]
-            # print(item)
+            print(item)
             try:
                 x = json.loads("".join(item.contents))
 
@@ -187,11 +194,26 @@ def get_logos(response):
 
     for img in soup.findAll("img"):
         blnHasLogoClassNameInParents = False
-        for img_parents in img.find_parents():
-            if img_parents.has_attr('class') and "logo" in img_parents.get("class"):
-                    blnHasLogoClassNameInParents = True
-        if blnHasLogoClassNameInParents:
-            arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": urljoin(base_url,img["src"]) }})    
+        blnHasAHeaderTagInParents = False
+        blnHasALinkInParents = False
+
+        if img.has_attr('src'):
+            for img_parents in img.find_parents():
+                if img_parents.has_attr('class') and "logo" in img_parents.get("class"):
+                        blnHasLogoClassNameInParents = True
+                if img_parents.name == "header":
+                        blnHasAHeaderTagInParents = True
+                if img_parents.name == "a":
+                    blnHasALinkInParents = True
+            if blnHasLogoClassNameInParents:
+                arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": urljoin(base_url,img["src"]) }})    
+
+            if blnHasAHeaderTagInParents:
+                arrayLogos.append({ "image": {"type": "url_has_header_in_parents", "url": urljoin(base_url,img["src"]) }})  
+
+            if blnHasALinkInParents:
+                arrayLogos.append({ "image": {"type": "url_has_link_in_parents", "url": urljoin(base_url,img["src"]) }})  
+
 
 
     return arrayLogos
@@ -207,7 +229,7 @@ def getDownloads(arrayLogos):
                 url = item_image["url"]
                 print(url)
                 if url.startswith("data:"):
-                    contentbase64= re.sub("data:image\/gif,","",url)
+                    contentbase64= re.sub("data:image\/[^,]+,","",url)
                     print(contentbase64)
                     image_downloaded = Image.open(BytesIO(base64.b64decode(contentbase64)))
                 else:
@@ -233,32 +255,44 @@ def getDownloads(arrayLogos):
 
 def getScores(arrayLogos):
     result_scores= {}
+    result_rules= {}
 
     scores = {
-        "url_class_logo_in_parents": 1,
+        "url_class_logo_in_parents": 3,
         "url_json_ld_logo": 10,
         "url_manifest_image": 5,
-        "apple-touch-icon": 3,
+        "apple-touch-icon": 4,
         "url_src_contains_logo": 2,
-        "url_og_logo": 4,
-        "url_favicon_html": 2,
+        "url_og_image": 2,
+        "url_og_logo": 10,
+        "url_favicon_html": 3,
         "class_contains_logo": 3, 
-        "url_rss_image": 5
+        "url_rss_image": 5,
+        "url_twitter_image":8,
+        "alt_contains_logo": 5,
+        "url_has_header_in_parents": 1,
+        "url_has_link_in_parents": 1
     }
     
     for item in arrayLogos:
+        print(" ")
+        print("-----------------")
         image = item["image"]
             
         if image:
             score = scores[image["type"]]
             url = image["url"]
-
+            print(image["type"], image["url"], score)
             if url in result_scores:
-                result_scores[url] = result_scores[url] + score
-            else:
-                result_scores[url] = score
+                result_scores[url] = result_scores[url] + score * 10
+                result_rules[url]= result_rules[url] + " | " + image["type"] + " (+" + str(score) + ")"
 
-    
+            else:
+                result_scores[url] = score * 10
+                result_rules[url] = image["type"] + " (+" + str(score) + ")"
+
+    print(" ")
+    print(result_scores)
 
     # dedoublonne
     result_dict= dict()
@@ -267,6 +301,7 @@ def getScores(arrayLogos):
         if image:
             url = image["url"]
             item["score"] =  result_scores[url]
+            item["score_rules"] = result_rules[url]
         result_dict[url] = item
     result=[]
     for key in result_dict:
@@ -278,10 +313,13 @@ def getScores(arrayLogos):
         if item["width"] and item["height"]:
             if item["width"]<80 or item["height"]<80:
                 item["score"] = item["score"] / 2
-            if item["width"]>130 and item["height"]>130:
+                item["score_rules"]= item["score_rules"] + " | " + "/2 because < 80px "
+            if item["width"]>130 or item["height"]>130:
                 item["score"] = item["score"] * 2
-            if item["width"]>400 and item["height"]>400:
+                item["score_rules"]= item["score_rules"]   + " | " + "*2 because > 130px "
+            if item["width"]>300 or item["height"]>300:
                 item["score"] = item["score"] * 2
+                item["score_rules"]= item["score_rules"] + " | " + "*2 because > 300px "
         else:
             score = 0
             
