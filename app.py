@@ -62,7 +62,7 @@ def find_logo(domain):
 
     result= {
         "logo": choosen_logo,
-        "logos_details": logos,
+        # "logos_details": logos,
         "logos_scores": logos_scored
         
     }
