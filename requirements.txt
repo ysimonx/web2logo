@@ -5,7 +5,6 @@ Flask-Caching
 flask_login
 requests
 beautifulsoup4
-pywebview
 lxml
 utils
 cairosvg

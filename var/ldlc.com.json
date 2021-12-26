@@ -1,0 +1,201 @@
+{
+    "logo": "https://www.ldlc.com/v4/img/common/LDLC-logo.gif",
+    "logos": [
+        {
+            "image": {
+                "type": "url_json_ld_logo",
+                "url": "https://www.ldlc.com/v4/img/common/LDLC-logo.gif"
+            },
+            "width": 400,
+            "height": 160,
+            "score": 400,
+            "score_rules": "url_json_ld_logo (+10) | *2 because > 130px  | *2 because > 300px "
+        },
+        {
+            "image": {
+                "type": "apple-touch-icon",
+                "url": "https://www.ldlc.com/v4/img/common/favicon/apple-touch-icon.png"
+            },
+            "width": 180,
+            "height": 180,
+            "score": 80,
+            "score_rules": "apple-touch-icon (+4) | *2 because > 130px "
+        },
+        {
+            "image": {
+                "type": "url_manifest_image",
+                "url": "https://www.ldlc.com/android-chrome-192x192.png"
+            },
+            "score": 50,
+            "score_rules": "url_manifest_image (+5)"
+        },
+        {
+            "image": {
+                "type": "url_manifest_image",
+                "url": "https://www.ldlc.com/android-chrome-512x512.png"
+            },
+            "score": 50,
+            "score_rules": "url_manifest_image (+5)"
+        },
+        {
+            "image": {
+                "type": "url_has_link_in_parents",
+                "url": "https://media.ldlc.com/cms/2021-11/LDLC-logo_noel21.gif"
+            },
+            "width": 400,
+            "height": 160,
+            "score": 40,
+            "score_rules": "url_has_link_in_parents (+1) | *2 because > 130px  | *2 because > 300px "
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/mkt/ldlc/fr/odr/generique.jpg"
+            },
+            "width": 285,
+            "height": 150,
+            "score": 20,
+            "score_rules": "url_has_header_in_parents (+1) | *2 because > 130px "
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/2018-12/coin-affaire_0.jpg"
+            },
+            "width": 285,
+            "height": 150,
+            "score": 20,
+            "score_rules": "url_has_header_in_parents (+1) | *2 because > 130px "
+        },
+        {
+            "image": {
+                "type": "url_favicon_html",
+                "url": "https://www.ldlc.com/v4/img/common/favicon/favicon-32x32.png"
+            },
+            "width": 32,
+            "height": 32,
+            "score": 15.0,
+            "score_rules": "url_favicon_html (+3) | /2 because < 80px "
+        },
+        {
+            "image": {
+                "type": "url_favicon_html",
+                "url": "https://www.ldlc.com/v4/img/common/favicon/favicon-16x16.png"
+            },
+            "width": 16,
+            "height": 16,
+            "score": 15.0,
+            "score_rules": "url_favicon_html (+3) | /2 because < 80px "
+        },
+        {
+            "image": {
+                "type": "url_src_contains_logo",
+                "url": "https://media.ldlc.com/cms/2018-05/logo-jpdc_0.png"
+            },
+            "width": 130,
+            "height": 38,
+            "score": 10.0,
+            "score_rules": "url_src_contains_logo (+2) | /2 because < 80px "
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-informatique.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-image-son.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-telephonie-auto.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-jeux-loisirs.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-objet-connectes.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-consommable.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-connectique.png"
+            },
+            "width": 100,
+            "height": 100,
+            "score": 10,
+            "score_rules": "url_has_header_in_parents (+1)"
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/r50/ld/products/00/03/94/75/LD0003947582_2.jpg"
+            },
+            "width": 50,
+            "height": 50,
+            "score": 5.0,
+            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px "
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/r50/ld/products/00/04/27/93/LD0004279343_2.jpg"
+            },
+            "width": 50,
+            "height": 50,
+            "score": 5.0,
+            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px "
+        },
+        {
+            "image": {
+                "type": "url_has_header_in_parents",
+                "url": "https://media.ldlc.com/r50/ld/products/00/04/56/19/LD0004561946_2.jpg"
+            },
+            "width": 50,
+            "height": 50,
+            "score": 5.0,
+            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px "
+        }
+    ]
+}
