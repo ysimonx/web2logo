@@ -39,7 +39,8 @@ def find_logo(domain):
     logos_scored = logoScrapper.get_logos(page)
 
     if len(logos_scored) > 0:
-        # print(logos_scored[0])
+        print(logos_scored[0])
+    
         if not request.args.get('debug'): 
             img_io = BytesIO()
             pil_img = logoScrapper.get_image(logos_scored[0]["image"]["url"])

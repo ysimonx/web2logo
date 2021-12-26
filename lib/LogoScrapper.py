@@ -95,7 +95,7 @@ class LogoScrapper:
 
         # print(response.status_code)
         if response.status_code == 200:
-            if (str(response.content).startswith('<svg')):
+            if ('<svg' in str(response.content)):
                  return self.convert_svgtag_to_image(response.content)
 
             image_bytes = io.BytesIO(response.content)
@@ -104,6 +104,7 @@ class LogoScrapper:
                 return img
             except: 
                 print("erreur sur chargement image ", url)
+                print(response.content)
                 return None
         
         else:
@@ -160,12 +161,16 @@ class LogoScrapper:
                 blnHasAHeaderTagInParents = False
                 blnHasALinkInParents = False
                 blnHasALinkInParentsWithLogoInTitle = False
+                blnHasAParentWithLogoInId = False
+                
                 if img.has_attr('src'):
                     for img_parents in img.find_parents():
-                        if img_parents.has_attr('class') and "logo" in img_parents.get("class"):
+                        if img_parents.has_attr('class') and "logo" in str(img_parents.get("class")).lower():
                                 blnHasLogoClassNameInParents = True
                         if img_parents.name == "header":
                                 blnHasAHeaderTagInParents = True
+                        if img_parents.has_attr('id') and "logo" in str(img_parents.get("id")).lower():
+                                blnHasAParentWithLogoInId = True
                         if img_parents.name == "a":
                             if img_parents.has_attr('href') and (
                                 urljoin(base_url,img_parents["href"  ])  == base_url
@@ -174,7 +179,7 @@ class LogoScrapper:
                             ) :
                                 # print("url parent = " + urljoin(base_url,img_parents["href"  ]) + " vs " + base_url)
                                 blnHasALinkInParents = True
-                                if img_parents.has_attr('title') and "logo" in img_parents["title"].lower():
+                                if img_parents.has_attr('title') and "logo" in str(img_parents["title"]).lower():
                                     blnHasALinkInParentsWithLogoInTitle = True
                             
                     if blnHasLogoClassNameInParents:
@@ -188,6 +193,10 @@ class LogoScrapper:
 
                     if blnHasALinkInParentsWithLogoInTitle:
                         arrayLogos.append({ "image": {"type": "url_has_link_in_parents_with_logo_in_title", "url": urljoin(base_url,img["src"]) }})  
+
+                    if blnHasAParentWithLogoInId:
+                        arrayLogos.append({ "image": {"type": "url_has_a_parents_with_logo_in_id", "url": urljoin(base_url,img["src"]) }})  
+
                 else:
                     arrayLogos.append({ "image": {"type": "inline_image",  "url": str(img) }})
 
@@ -199,8 +208,9 @@ class LogoScrapper:
             # print("manifest ! ", urljoin(base_url, url_manifest['href']))
             response_manifest = self.get_url_content(urljoin(base_url, url_manifest['href']))
             js = json.loads(response_manifest.content)
-            for icon in js["icons"]:
-                arrayLogos.append({ "image": {"type": "url_manifest_image",  "url": urljoin(base_url,icon["src"]) }})
+            if "icons" in js:
+                for icon in js["icons"]:
+                    arrayLogos.append({ "image": {"type": "url_manifest_image",  "url": urljoin(base_url,icon["src"]) }})
 
 
         for item in soup.findAll("link", type="application/rss+xml"):
@@ -249,9 +259,9 @@ class LogoScrapper:
         for item in arrayLogos:
             item_image = item["image"]
             if item_image:
-                #try:
+                try:
                     url = item_image["url"]
-                    print("url >", url)
+                    # print("url >", url)
                     if url == None:
                         print("none")
                     
@@ -264,7 +274,7 @@ class LogoScrapper:
 
                     if (image_downloaded):
                         result_size[url] = image_downloaded.size    
-                # except:
+                except:
                     a=1
 
         
@@ -272,13 +282,14 @@ class LogoScrapper:
             item_image = item["image"]
             if item_image:
                 url = item_image["url"]
+                
                 if url in result_size:
                     width, height = result_size[url]
                     item["width"] = width
                     item["height"] = height
                     result.append(item)
 
-                if url.startswith("<svg"):
+                if "<svg" in url:
                     item["is_svg"] = True
                     
                 result.append(item)
@@ -304,6 +315,7 @@ class LogoScrapper:
             "url_twitter_image":8,
             "alt_contains_logo": 5,
             "url_has_link_in_parents_with_logo_in_title":5,
+            "url_has_a_parents_with_logo_in_id": 5,
             "url_has_header_in_parents": 1,
             "url_has_link_in_parents": 1,
             "inline_image": 1
@@ -317,10 +329,10 @@ class LogoScrapper:
                 score = scores[image["type"]]
                 url = image["url"]
                 # print(image["type"], image["url"], score)
-                if url in result_scores:
+                if url in result_scores and not image["type"] in result_rules[url]:
                     result_scores[url] = result_scores[url] + score * 10
                     result_rules[url]= result_rules[url] + " | " + image["type"] + " (+" + str(score) + ")"
-
+                    
                 else:
                     result_scores[url] = score * 10
                     result_rules[url] = image["type"] + " (+" + str(score) + ")"
@@ -358,10 +370,10 @@ class LogoScrapper:
             else:
                 score = 0
 
-            if "is_svg" in item :
+            if "is_svg" in item and len(item["image"]["url"]) > 6000:
                 item["score"] = item["score"] * 4
                 item["score_rules"]= item["score_rules"] + " | " + "*4 because is_svg "
-
+                print(item)
             result_pondere.append(item)
 
         # tri desc
