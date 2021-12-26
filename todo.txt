@@ -1,0 +1,24 @@
+données structurées sur https://www.deloryjouveau.com/
+<link rel="shortcut icon" href="https://www.deloryjouveau.com/wp-content/uploads/2020/07/favicon32.png" type="image/x-icon" />
+<!-- For iPhone -->
+<link rel="apple-touch-icon" href="https://www.deloryjouveau.com/wp-content/uploads/2020/07/favicon57.png">
+<!-- For iPhone Retina display -->
+<link rel="apple-touch-icon" sizes="114x114" href="https://www.deloryjouveau.com/wp-content/uploads/2020/07/favincon114.png">
+<!-- For iPad -->
+<link rel="apple-touch-icon" sizes="72x72" href="https://www.deloryjouveau.com/wp-content/uploads/2020/07/favicon72.png">
+<!-- For iPad Retina display -->
+<link rel="apple-touch-icon" sizes="144x144" href="https://www.deloryjouveau.com/wp-content/uploads/2020/07/favicon144.png">
+
+
+
+balise favicon dans code html
+fichier favicon.ico associé au domaine
+
++  qq points si un clic est possible dessus
+
++ qq points si un clic vers la home est possible
+
++ qq points si c'est un svg
+
++ qq points si le ALT contient le mot logo
+
