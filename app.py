@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_file
 from flask_cors import CORS
 from flask_caching import Cache
 
 import json
+from io import BytesIO
 
 
 from lib.LogoScrapper import LogoScrapper 
@@ -29,31 +30,25 @@ def hello():
 @app.route('/logo/<domain>', methods=('GET', 'POST'))
 @cache.cached(timeout=10)
 def find_logo(domain):
-    home = 'https://%s/' % (domain)  
+
+    page = 'https://%s/' % (domain)  
     
     #print(home)
     
     logoScrapper =  LogoScrapper();
-
-    response = logoScrapper.get_url_content(home)
-
-    logos = logoScrapper.get_logos(response)
- 
-  
-
-    logos_downloaded = logoScrapper.getDownloads(logos)
-   
-    
-    logos_scored = logoScrapper.getScores(logos_downloaded)
-
+    logos_scored = logoScrapper.get_logos(page)
 
     if len(logos_scored) > 0:
         # print(logos_scored[0])
         if not request.args.get('debug'): 
-            return redirect(logos_scored[0]["image"]["url"], code=302)
+            img_io = BytesIO()
+            pil_img = logoScrapper.get_image(logos_scored[0]["image"]["url"])
+            pil_img.convert('RGB').save(img_io, 'JPEG', quality=70)
+            img_io.seek(0)
+            return send_file(img_io, mimetype='image/jpeg')
+            # return redirect(logos_scored[0]["image"]["url"], code=302)
 
     if len(logos_scored) > 0:
-
         choosen_logo = logos_scored[0]["image"]["url"]
     else:
         choosen_logo = ""
@@ -64,6 +59,7 @@ def find_logo(domain):
         "logos_scores": logos_scored
         
     }
+    
     response = app.response_class(
         response=json.dumps(result),
         mimetype='application/json'

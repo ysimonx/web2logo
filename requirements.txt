@@ -8,3 +8,4 @@ beautifulsoup4
 pywebview
 lxml
 utils
+cairosvg
