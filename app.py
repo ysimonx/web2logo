@@ -43,13 +43,12 @@ def find_logo(domain):
 
     logos_downloaded = logoScrapper.getDownloads(logos)
    
-    print(logos_downloaded)
-
+    
     logos_scored = logoScrapper.getScores(logos_downloaded)
 
 
     if len(logos_scored) > 0:
-        print(logos_scored[0])
+        # print(logos_scored[0])
         if not request.args.get('debug'): 
             return redirect(logos_scored[0]["image"]["url"], code=302)
 

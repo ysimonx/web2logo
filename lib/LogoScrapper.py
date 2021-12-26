@@ -54,7 +54,7 @@ class LogoScrapper:
         
 
     def get_image(self, url):
-        print("url image = " + url )
+        # print("url image = " + url )
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -130,7 +130,7 @@ class LogoScrapper:
         for item in soup.findAll('script', {'type':'application/ld+json'}):
 
                 tab_json=[]
-                print(item)
+                # print(item)
                 try:
                     x = json.loads("".join(item.contents))
 
@@ -160,7 +160,7 @@ class LogoScrapper:
                             blnHasAHeaderTagInParents = True
                     if img_parents.name == "a":
                         if img_parents.has_attr('href') and  urljoin(base_url,img_parents["href"  ])  == base_url :
-                            print("url parent = " + urljoin(base_url,img_parents["href"  ]) + " vs " + base_url)
+                            # print("url parent = " + urljoin(base_url,img_parents["href"  ]) + " vs " + base_url)
                             blnHasALinkInParents = True
                         
                 if blnHasLogoClassNameInParents:
@@ -185,10 +185,10 @@ class LogoScrapper:
             if item_image:
                 try:
                     url = item_image["url"]
-                    print(url)
+                    # print(url)
                     if url.startswith("data:"):
                         contentbase64= re.sub("data:image\/[^,]+,","",url)
-                        print(contentbase64)
+                        # print(contentbase64)
                         image_downloaded = Image.open(BytesIO(base64.b64decode(contentbase64)))
                     else:
                         image_downloaded = self.get_image(url)
@@ -233,14 +233,13 @@ class LogoScrapper:
         }
         
         for item in arrayLogos:
-            print(" ")
-            print("-----------------")
+
             image = item["image"]
                 
             if image:
                 score = scores[image["type"]]
                 url = image["url"]
-                print(image["type"], image["url"], score)
+                # print(image["type"], image["url"], score)
                 if url in result_scores:
                     result_scores[url] = result_scores[url] + score * 10
                     result_rules[url]= result_rules[url] + " | " + image["type"] + " (+" + str(score) + ")"
@@ -249,8 +248,8 @@ class LogoScrapper:
                     result_scores[url] = score * 10
                     result_rules[url] = image["type"] + " (+" + str(score) + ")"
 
-        print(" ")
-        print(result_scores)
+        # print(" ")
+        # print(result_scores)
 
         # dedoublonne
         result_dict= dict()
