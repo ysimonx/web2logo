@@ -1,8 +1,10 @@
+from logging import log
 from flask          import Flask, render_template, request, redirect, send_file
 from flask_cors     import CORS
 from flask_caching  import Cache
 from io             import BytesIO
 import json
+import validators
 
 from lib.LogoScrapper import LogoScrapper 
 
@@ -32,29 +34,29 @@ def find_logo(domain):
     logoScrapper =  LogoScrapper();
     logos = logoScrapper.get_logos(page)
 
+    result= {
+            "logos": logos,
+            "url": logoScrapper.last_url
+    }
+    
+    with open('./var/%s.json' % (domain), 'w') as outfile:
+        json.dump(result, outfile, indent=4)
+
+    
     if len(logos) > 0:
-        choosen_logo = logos[0]["image"]["url"]
         if not request.args.get('debug'): 
             img_io = BytesIO()
             pil_img = logoScrapper.get_image(logos[0]["image"]["url"])
             pil_img.convert('RGB').save(img_io, 'JPEG', quality=70)
             img_io.seek(0)
             return send_file(img_io, mimetype='image/jpeg')
-    else:
-         choosen_logo = ""
-    
-    result= {
-        "logo": choosen_logo,
-        "logos": logos
-    }
-    
-    with open('./var/%s.json' % (domain), 'w') as outfile:
-        json.dump(result, outfile, indent=4)
+   
 
     response = app.response_class(
         response=json.dumps(result, indent=4),
         mimetype='application/json'
     )
+    #print(logoScrapper.last_error)
     return response
 
 

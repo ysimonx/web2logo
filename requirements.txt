@@ -6,5 +6,5 @@ flask_login
 requests
 beautifulsoup4
 lxml
-utils
 cairosvg
+validators
