@@ -4,7 +4,7 @@ from flask_cors     import CORS
 from flask_caching  import Cache
 from io             import BytesIO
 import json
-import validators
+
 
 from lib.LogoScrapper import LogoScrapper 
 
@@ -47,6 +47,7 @@ def find_logo(domain):
         if not request.args.get('debug'): 
             img_io = BytesIO()
             pil_img = logoScrapper.get_image(logos[0]["image"]["url"])
+            print(logos[0]["image"]["url"])
             pil_img.convert('RGB').save(img_io, 'JPEG', quality=70)
             img_io.seek(0)
             return send_file(img_io, mimetype='image/jpeg')

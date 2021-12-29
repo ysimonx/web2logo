@@ -72,20 +72,34 @@ class LogoScrapper:
             if svg.has_attr("viewbox"):
                 viewbox = svg["viewbox"]
                 x0,y0,x1,y1 = viewbox.split(" ")
+                x0 =int(float(x0))                  # peut etre "100.32" -> float 100.32 -> int 100
+                y0 = int(float(y0))
+                x1 = int(float(x1))
+                y1 = int(float(y1))
+
             else:
                 if svg.has_attr("height") and svg.has_attr("width"):
                     x0=0
                     y0=0
-                    x1=int(svg["width"])
-                    y1=int(svg["height"])
+                    x1=int(float(svg["width"]))
+                    y1=int(float(svg["height"]))
 
             if isinstance(text, bytes): # cf : https://stackoverflow.com/questions/39778978/how-to-identify-a-string-as-being-a-byte-literal
+               
                 png = svg2png(text, parent_width=int(x1)-int(x0), parent_height=int(y1)-int(y0))
+                
             else:
+               
                 png = svg2png(bytestring=bytes(text, 'utf-8'),parent_width=int(x1)-int(x0), parent_height=int(y1)-int(y0))
 
             pil_img = Image.open(BytesIO(png))
-            return pil_img
+
+
+            new_image = Image.new("RGBA", pil_img.size, "#808080") # Create a white rgba background
+            new_image.paste(pil_img, (0, 0), pil_img)              # Paste the image on the background. Go to the links given below for details.
+            new_image.convert('RGB').save('test.jpg', "JPEG")  # Save as JPEG
+
+            return new_image
         except:
             return None
 
@@ -101,8 +115,11 @@ class LogoScrapper:
         
         try:
             response = requests.get(url, headers=headers)
+            # print (response.status_code)
             if response.status_code == 200:
                 if ('<svg' in str(response.content)):
+                    # print("contains svg xml")
+                    # print(response.content)
                     return self.convert_svgtag_to_image(response.content)
 
                 image_bytes = io.BytesIO(response.content)
@@ -219,24 +236,32 @@ class LogoScrapper:
                             blnHasALinkInParentsToHome = True
                             
                         
+                if img.has_attr("src"):
+                    reference = urljoin(base_url,img["src"])
+                else:
+                    reference = str(img)
+
+                # print("---------------- ")
+                # print(reference)
+                # print(type(reference))
 
                 if blnHasLogoClassNameInParents:
-                    arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": urljoin(base_url,img["src"]) }})    
+                    arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": reference }})    
 
                 if blnHasAHeaderTagInParents:
-                    arrayLogos.append({ "image": {"type": "url_has_header_in_parents", "url": urljoin(base_url,img["src"]) }})  
+                    arrayLogos.append({ "image": {"type": "url_has_header_in_parents", "url": reference }})  
 
                 if blnHasALinkInParents:
-                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents", "url": urljoin(base_url,img["src"]) }})  
+                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents", "url": reference}})  
 
                 if blnHasALinkInParentsWithLogoInTitle:
-                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents_with_logo_in_title", "url": urljoin(base_url,img["src"]) }})  
+                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents_with_logo_in_title", "url": reference }})  
 
                 if blnHasAParentWithLogoInId:
-                    arrayLogos.append({ "image": {"type": "url_has_a_parents_with_logo_in_id", "url": urljoin(base_url,img["src"]) }})  
+                    arrayLogos.append({ "image": {"type": "url_has_a_parents_with_logo_in_id", "url": reference }})  
 
                 if blnHasALinkInParentsToHome:
-                    arrayLogos.append({ "image": {"type": "url_has_link_in_parent_to_home", "url": urljoin(base_url,img["src"]) }})  
+                    arrayLogos.append({ "image": {"type": "url_has_link_in_parent_to_home", "url": reference }})  
 
 
             #else:
@@ -288,8 +313,6 @@ class LogoScrapper:
                     a=1
 
 
-
-        # print(arrayLogos)
         return arrayLogos
 
     def download_logos(self, arrayLogos):
@@ -305,7 +328,7 @@ class LogoScrapper:
             if item_image:
                 try:
                     url = item_image["url"]
-                    
+                   
                     if url.startswith("data:"):
                         contentbase64= re.sub("data:image\/[^,]+,","",url)
                         # print(contentbase64)
@@ -318,7 +341,7 @@ class LogoScrapper:
                     if (image_downloaded):
                         result_size[url] = image_downloaded.size    
                     else:
-                        #print("in error")
+                        print("in error : ", url)
                         result_error.append(url)
                 except:
                     a=1
@@ -420,7 +443,7 @@ class LogoScrapper:
         result_pondere = []
         for item in result:
             
-            if "width" in item and "height" in item and not "is_svg" in item:
+            if "width" in item and "height" in item: # and not "is_svg" in item:
                 if item["width"]<32 or item["height"]<32:
                     item["score"] = item["score"] / 2
                     item["score_rules"]= item["score_rules"] + " | " + "/2 because < 32px "
@@ -436,11 +459,14 @@ class LogoScrapper:
             else:
                 score = 0
 
-            if "is_svg" in item and len(item["image"]["url"]) > 6000:
+            if "is_svg" in item and not item["image"]["url"].startswith("http") : #and len(item["image"]["url"]) > 6000:
                 item["score"] = item["score"] * 4
-                item["score_rules"]= item["score_rules"] + " | " + "*4 because is_svg "
+                item["score_rules"]= item["score_rules"] + " | " + "*4 because is_svg and large inline"
                 # print(item)
-
+            if "is_svg" in item and item["image"]["url"].startswith("http"):
+                item["score"] = item["score"] * 4
+                item["score_rules"]= item["score_rules"] + " | " + "*4 because is_svg  and external"
+                
             if "error" in item:
                 item["score"] = 0
                 item["score_rules"]= item["score_rules"] + " | " + "*0 because error on scrap "
