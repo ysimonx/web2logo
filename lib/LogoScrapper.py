@@ -35,7 +35,7 @@ class LogoScrapper:
     def getLogosFromPage(self,page):
         self.last_url = None
         response         = self.getHTTPResponse(page)
-        logos            = self.getLogosFromResponse(response)
+        logos            = self.extractLogosFromHTTPResponse(response)
         # print(logos)
 
         logos_downloaded = self.download_logos(logos)
@@ -68,7 +68,7 @@ class LogoScrapper:
         # print(" - - - - - - - - - - - -")
         # print("url image = " + url )
         if url.startswith('<svg'):
-            return self.convert_svgtag_to_image(url)
+            return self.convertSVGtoImage(url)
 
         headers = {
             "User-Agent":self.useragent
@@ -81,7 +81,7 @@ class LogoScrapper:
                 if ('<svg' in str(response.content)):
                     # print("contains svg xml")
                     # print(response.content)
-                    return self.convert_svgtag_to_image(response.content)
+                    return self.convertSVGtoImage(response.content)
 
                 image_bytes = io.BytesIO(response.content)
                 img = Image.open(image_bytes)
@@ -99,7 +99,7 @@ class LogoScrapper:
         return None
 
     
-    def convert_svgtag_to_image(self, text):
+    def convertSVGtoImage(self, text):
         try:
             svgsoup = BeautifulSoup(text, features="html.parser")
             svg = svgsoup.find("svg")
@@ -139,10 +139,10 @@ class LogoScrapper:
 
  
 
-    def scrapURLImages(self, items, attribute, type, base_url):
+    def extractURLImageFromBS4Nodes(self, nodes, attribute, type, base_url):
         
         dict=[]
-        for item in items:
+        for item in nodes:
 
             try:
                 if item.has_attr(attribute): # ex : "src"
@@ -158,7 +158,7 @@ class LogoScrapper:
         return dict
 
 
-    def getLogosFromResponse(self,response):
+    def extractLogosFromHTTPResponse(self,response):
         
         arrayLogos=[]
 
@@ -176,20 +176,20 @@ class LogoScrapper:
         soup = BeautifulSoup(content, features="html.parser")
 
         # balises SEO
-        arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll("link", rel="icon"), "href" ,"url_favicon_html",        base_url )
-        arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll("link", rel="apple-touch-icon"), "href", "apple-touch-icon",  base_url)
-        arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll("meta", property="og:logo"), "content" ,"url_og_logo",  base_url )
-        arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll("meta", property="og:image"), "content" ,"url_og_image", base_url )
-        arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll("meta", property="twitter:image"), "content" ,"url_twitter_image",       base_url )
+        arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("link", rel="icon"), "href" ,"url_favicon_html",        base_url )
+        arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("link", rel="apple-touch-icon"), "href", "apple-touch-icon",  base_url)
+        arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("meta", property="og:logo"), "content" ,"url_og_logo",  base_url )
+        arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("meta", property="og:image"), "content" ,"url_og_image", base_url )
+        arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("meta", property="twitter:image"), "content" ,"url_twitter_image",       base_url )
 
         # img et/ou svg
 
         tags_images =["img", "svg"]
         for tag in tags_images:
-            arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll(tag, {"src":    re.compile("(?i).*logo.*")}), "src" ,"url_src_contains_logo",       base_url )
-            arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll(tag, {"class" : re.compile('(?i).*logo.*')}), "src" ,"class_contains_logo",       base_url )
-            arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll(tag, {"alt" : re.compile('(?i).*logo.*')}),   "src", "alt_contains_logo",  base_url)
-            arrayLogos = arrayLogos + self.scrapURLImages(soup.findAll(tag, itemprop="logo"),                        "src" ,"url_schema_org",       base_url )
+            arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll(tag, {"src":    re.compile("(?i).*logo.*")}), "src" ,"url_src_contains_logo",       base_url )
+            arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll(tag, {"class" : re.compile('(?i).*logo.*')}), "src" ,"class_contains_logo",       base_url )
+            arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll(tag, {"alt" : re.compile('(?i).*logo.*')}),   "src", "alt_contains_logo",  base_url)
+            arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll(tag, itemprop="logo"),                        "src" ,"url_schema_org",       base_url )
         
 
 
