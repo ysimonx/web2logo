@@ -32,7 +32,7 @@ def find_logo(domain):
     page = 'https://%s/' % (domain)  
 
     logoScrapper =  LogoScrapper();
-    logos = logoScrapper.get_logos(page)
+    logos = logoScrapper.getLogosFromPage(page)
 
     result= {
             "logos": logos,
@@ -46,7 +46,7 @@ def find_logo(domain):
     if len(logos) > 0:
         if not request.args.get('debug'): 
             img_io = BytesIO()
-            pil_img = logoScrapper.get_image(logos[0]["image"]["url"])
+            pil_img = logoScrapper.getImageFromTag(logos[0]["image"]["url"])
             print(logos[0]["image"]["url"])
             pil_img.convert('RGB').save(img_io, 'JPEG', quality=70)
             img_io.seek(0)

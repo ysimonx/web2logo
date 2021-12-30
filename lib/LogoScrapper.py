@@ -32,9 +32,9 @@ class LogoScrapper:
         self.last_image_error = None
         self.last_url = None
 
-    def get_logos(self,page):
+    def getLogosFromPage(self,page):
         self.last_url = None
-        response         = self.get_url_content(page)
+        response         = self.getHTTPResponse(page)
         logos            = self.getLogosFromResponse(response)
         # print(logos)
 
@@ -44,7 +44,7 @@ class LogoScrapper:
 
 
 
-    def get_url_content(self, url):
+    def getHTTPResponse(self, url):
 
         headers = {
                 "User-Agent": self.useragent
@@ -64,6 +64,40 @@ class LogoScrapper:
             
         return None
         
+    def getImageFromTag(self, url):
+        # print(" - - - - - - - - - - - -")
+        # print("url image = " + url )
+        if url.startswith('<svg'):
+            return self.convert_svgtag_to_image(url)
+
+        headers = {
+            "User-Agent":self.useragent
+        }
+        
+        try:
+            response = requests.get(url, headers=headers)
+            # print (response.status_code)
+            if response.status_code == 200:
+                if ('<svg' in str(response.content)):
+                    # print("contains svg xml")
+                    # print(response.content)
+                    return self.convert_svgtag_to_image(response.content)
+
+                image_bytes = io.BytesIO(response.content)
+                img = Image.open(image_bytes)
+                return img
+        except requests.exceptions.Timeout:
+            # Maybe set up for a retry, or continue in a retry loop
+            self.last_image_error = "requests.exceptions.Timeout"
+        except requests.exceptions.TooManyRedirects:
+            # Tell the user their URL was bad and try a different one
+            self.last_image_error = "requests.exceptions.TooManyRedirects"
+        except requests.exceptions.RequestException as e:
+            # catastrophic error. bail.
+            self.last_image_error = "requests.exceptions.RequestException : %s" % (e) 
+            
+        return None
+
     
     def convert_svgtag_to_image(self, text):
         try:
@@ -103,40 +137,7 @@ class LogoScrapper:
         except:
             return None
 
-    def get_image(self, url):
-        # print(" - - - - - - - - - - - -")
-        # print("url image = " + url )
-        if url.startswith('<svg'):
-            return self.convert_svgtag_to_image(url)
-
-        headers = {
-            "User-Agent":self.useragent
-        }
-        
-        try:
-            response = requests.get(url, headers=headers)
-            # print (response.status_code)
-            if response.status_code == 200:
-                if ('<svg' in str(response.content)):
-                    # print("contains svg xml")
-                    # print(response.content)
-                    return self.convert_svgtag_to_image(response.content)
-
-                image_bytes = io.BytesIO(response.content)
-                img = Image.open(image_bytes)
-                return img
-        except requests.exceptions.Timeout:
-            # Maybe set up for a retry, or continue in a retry loop
-            self.last_image_error = "requests.exceptions.Timeout"
-        except requests.exceptions.TooManyRedirects:
-            # Tell the user their URL was bad and try a different one
-            self.last_image_error = "requests.exceptions.TooManyRedirects"
-        except requests.exceptions.RequestException as e:
-            # catastrophic error. bail.
-            self.last_image_error = "requests.exceptions.RequestException : %s" % (e) 
-            
-        return None
-
+ 
 
     def scrapURLImages(self, items, attribute, type, base_url):
         
@@ -145,12 +146,12 @@ class LogoScrapper:
 
             try:
                 if item.has_attr(attribute): # ex : "src"
-                    dict.append({ "image": {"type": type, "url": urljoin(base_url, item[attribute]) }})
+                    dict.append({ "image": {"type": type, "url": urljoin(base_url, item[attribute]), "tag":str(item) }})
                     if "logo" in item[attribute].lower():
-                        dict.append({ "image": {"type": "url_src_contains_logo", "url": urljoin(base_url, item[attribute]) }})
+                        dict.append({ "image": {"type": "url_src_contains_logo", "url": urljoin(base_url, item[attribute]), "tag":str(item) }})
                         
                 else:
-                    dict.append({ "image": {"type": type, "url": str(item) }})
+                    dict.append({ "image": {"type": type, "url": str(item), "tag":str(item) }})
             except:
                 a=1
                 
@@ -246,22 +247,22 @@ class LogoScrapper:
                 # print(type(reference))
 
                 if blnHasLogoClassNameInParents:
-                    arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": reference }})    
+                    arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": reference, "tag": str(img) }})    
 
                 if blnHasAHeaderTagInParents:
-                    arrayLogos.append({ "image": {"type": "url_has_header_in_parents", "url": reference }})  
+                    arrayLogos.append({ "image": {"type": "url_has_header_in_parents", "url": reference, "tag": str(img) }})  
 
                 if blnHasALinkInParents:
-                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents", "url": reference}})  
+                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents", "url": reference, "tag": str(img)}})  
 
                 if blnHasALinkInParentsWithLogoInTitle:
-                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents_with_logo_in_title", "url": reference }})  
+                    arrayLogos.append({ "image": {"type": "url_has_link_in_parents_with_logo_in_title", "url": reference, "tag": str(img) }})  
 
                 if blnHasAParentWithLogoInId:
-                    arrayLogos.append({ "image": {"type": "url_has_a_parents_with_logo_in_id", "url": reference }})  
+                    arrayLogos.append({ "image": {"type": "url_has_a_parents_with_logo_in_id", "url": reference, "tag": str(img) }})  
 
                 if blnHasALinkInParentsToHome:
-                    arrayLogos.append({ "image": {"type": "url_has_link_in_parent_to_home", "url": reference }})  
+                    arrayLogos.append({ "image": {"type": "url_has_link_in_parent_to_home", "url": reference, "tag": str(img) }})  
 
 
             #else:
@@ -273,7 +274,7 @@ class LogoScrapper:
         url_manifest = soup.find("link", rel="manifest")
         if url_manifest:
             # print("manifest ! ", urljoin(base_url, url_manifest['href']))
-            response_manifest = self.get_url_content(urljoin(base_url, url_manifest['href']))
+            response_manifest = self.getHTTPResponse(urljoin(base_url, url_manifest['href']))
             js = json.loads(response_manifest.content)
             if "icons" in js:
                 for icon in js["icons"]:
@@ -282,7 +283,7 @@ class LogoScrapper:
 
         for item in soup.findAll("link", type="application/rss+xml"):
             try:
-                response_rss = self.get_url_content(urljoin(base_url, item['href']))
+                response_rss = self.getHTTPResponse(urljoin(base_url, item['href']))
                 soup_rss = BeautifulSoup(response_rss.content, 'lxml')
                 channel = soup_rss.find("channel")
                 image = channel.find("image")
@@ -334,15 +335,16 @@ class LogoScrapper:
                         # print(contentbase64)
                         image_downloaded = Image.open(BytesIO(base64.b64decode(contentbase64)))
                     else:
-                        image_downloaded = self.get_image(url)
+                        image_downloaded = self.getImageFromTag(url)
 
                     result_image[url] = image_downloaded
 
                     if (image_downloaded):
                         result_size[url] = image_downloaded.size    
                     else:
-                        print("in error : ", url)
-                        result_error.append(url)
+                        if item.has_attr("src"):
+                            print("in error : ", url)
+                            result_error.append(url)
                 except:
                     a=1
 
@@ -434,6 +436,11 @@ class LogoScrapper:
                 url = image["url"]
                 item["score"] =  result_scores[url]
                 item["score_rules"] = result_rules[url]
+                if "count" in item:
+                    item["count"] = item["count"] + 1
+                else:
+                    item["count"] = 1
+
             result_dict[url] = item
         result=[]
         for key in result_dict:
