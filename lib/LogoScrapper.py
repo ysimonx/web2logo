@@ -22,6 +22,7 @@ from cairosvg import svg2png
 import base64
 import operator
 
+from .Logo import Logo
 
 
 class LogoScrapper:
@@ -36,6 +37,9 @@ class LogoScrapper:
         self.last_url = None
         response         = self.getHTTPResponse(page)
         logos            = self.extractLogosFromHTTPResponse(response)
+        logos2           = self.extractLogosFromHTTPResponse2(response)
+        for logo in logos2:
+            print(logo.to_JSON())
         # print(logos)
 
         logos_downloaded = self.download_logos(logos)
@@ -142,16 +146,29 @@ class LogoScrapper:
     def extractURLImageFromBS4Nodes(self, nodes, attribute, type, base_url):
         
         dict=[]
-        for item in nodes:
+        for node in nodes:
 
             try:
-                if item.has_attr(attribute): # ex : "src"
-                    dict.append({ "image": {"type": type, "url": urljoin(base_url, item[attribute]), "tag":str(item) }})
-                    if "logo" in item[attribute].lower():
-                        dict.append({ "image": {"type": "url_src_contains_logo", "url": urljoin(base_url, item[attribute]), "tag":str(item) }})
+                if node.has_attr(attribute): # ex : "src"
+                    
+                    dict.append({ "image": {"type": type, "url": urljoin(base_url, node[attribute]), "tag":str(node) }})
+                    if "logo" in node[attribute].lower():
+                        dict.append({ "image": {"type": "url_src_contains_logo", "url": urljoin(base_url, node[attribute]), "tag":str(node) }})
                         
                 else:
-                    dict.append({ "image": {"type": type, "url": str(item), "tag":str(item) }})
+                    dict.append({ "image": {"type": type, "url": str(node), "tag":str(node) }})
+            except:
+                a=1
+                
+        return dict
+
+
+    def extractLogosFromBS4Nodes(self, nodes, type, base_url):
+        dict=[]
+        for node in nodes:
+            try:
+                logo = Logo(type, str(node), base_url)
+                dict.append(logo)
             except:
                 a=1
                 
@@ -161,7 +178,7 @@ class LogoScrapper:
     def extractLogosFromHTTPResponse(self,response):
         
         arrayLogos=[]
-
+      
         if response == None:
             return arrayLogos
 
@@ -182,6 +199,7 @@ class LogoScrapper:
         arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("meta", property="og:image"), "content" ,"url_og_image", base_url )
         arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll("meta", property="twitter:image"), "content" ,"url_twitter_image",       base_url )
 
+      
         # img et/ou svg
 
         tags_images =["img", "svg"]
@@ -192,6 +210,7 @@ class LogoScrapper:
             arrayLogos = arrayLogos + self.extractURLImageFromBS4Nodes(soup.findAll(tag, itemprop="logo"),                        "src" ,"url_schema_org",       base_url )
         
 
+      
 
             for img in soup.findAll(tag):
                 blnHasLogoClassNameInParents = False
@@ -225,7 +244,7 @@ class LogoScrapper:
                                 ):
                                 #print("accueil ")
                                 blnHasALinkInParentsWithLogoInTitle = True
-                            
+      
                         if img_parents.has_attr('href') and (
                             urljoin(base_url,img_parents["href"  ])  == base_url
                             or urljoin(base_url,img_parents["href"])  == base_url + "/home"
@@ -235,7 +254,6 @@ class LogoScrapper:
                         ) :
                             # print("url parent = " + urljoin(base_url,img_parents["href"  ]) + " vs " + base_url)
                             blnHasALinkInParentsToHome = True
-                            
                         
                 if img.has_attr("src"):
                     reference = urljoin(base_url,img["src"])
@@ -248,7 +266,7 @@ class LogoScrapper:
 
                 if blnHasLogoClassNameInParents:
                     arrayLogos.append({ "image": {"type": "url_class_logo_in_parents", "url": reference, "tag": str(img) }})    
-
+                    
                 if blnHasAHeaderTagInParents:
                     arrayLogos.append({ "image": {"type": "url_has_header_in_parents", "url": reference, "tag": str(img) }})  
 
@@ -279,8 +297,7 @@ class LogoScrapper:
             if "icons" in js:
                 for icon in js["icons"]:
                     arrayLogos.append({ "image": {"type": "url_manifest_image",  "url": urljoin(base_url,icon["src"]) }})
-
-
+      
         for item in soup.findAll("link", type="application/rss+xml"):
             try:
                 response_rss = self.getHTTPResponse(urljoin(base_url, item['href']))
@@ -314,7 +331,127 @@ class LogoScrapper:
                     a=1
 
 
+        # print(json.dumps(arrayLogos2))
         return arrayLogos
+
+
+    def extractLogosFromHTTPResponse2(self,response):
+        
+        arrayLogos2 = []
+
+        if response == None:
+            return arrayLogos2
+
+        content = response.content
+        # print(content)
+        url = response.url
+        base_url = urljoin(url, '.')   
+
+        self.last_url = url
+
+        # content="<html><img class='logo' src='test.png' /></html>"
+        soup = BeautifulSoup(content, features="html.parser")
+
+        # balises SEO
+        
+        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("link", rel="icon") ,"url_favicon_html",  base_url )
+        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("link", rel="apple-touch-icon") ,"apple-touch-icon",  base_url )
+        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("meta", property="og:logo") ,"url_og_logo",  base_url )
+        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("meta", property="og:image"),"url_og_image",  base_url )
+        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("meta", property="twitter:image"),"url_twitter_image",  base_url )
+
+        # img et/ou svg
+
+        tags_images =["img", "svg"]
+        for tag in tags_images:
+        
+            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, {"src":    re.compile("(?i).*logo.*")}) ,"url_src_contains_logo",  base_url )
+            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, {"class" : re.compile('(?i).*logo.*')}) ,"class_contains_logo",  base_url )
+            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, {"alt" : re.compile('(?i).*logo.*')})   ,"alt_contains_logo",  base_url )
+            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, itemprop="logo")                        ,"url_schema_org",  base_url )
+
+
+            for img in soup.findAll(tag):
+                for img_parents in img.find_parents():
+                    if img_parents.has_attr('class') and "logo" in str(img_parents.get("class")).lower():
+                            arrayLogos2.append(Logo("url_class_logo_in_parents", str(img), base_url))
+                    if img_parents.name == "header":
+                            arrayLogos2.append(Logo("url_has_header_in_parents", str(img), base_url))
+                    if img_parents.has_attr('id') and "logo" in str(img_parents.get("id")).lower():
+                            arrayLogos2.append(Logo("url_has_a_parents_with_logo_in_id", str(img), base_url))
+                    if img_parents.name == "a":
+                        if img_parents.has_attr('href'):
+                            # print("url parent = " + urljoin(base_url,img_parents["href"  ]) + " vs " + base_url)
+                            # blnHasALinkInParents = True
+                            
+                            if img_parents.has_attr('title') and (
+                                    "logo" in str(img_parents["title"]).lower()
+                                or 
+                                    "homepage" in str(img_parents["title"]).lower()
+                                    or 
+                                    "accueil" in str(img_parents["title"]).lower()
+                                ):
+                                arrayLogos2.append(Logo("url_has_link_in_parents_with_logo_in_title", str(img), base_url))
+
+                        if img_parents.has_attr('href') and (
+                            urljoin(base_url,img_parents["href"  ])  == base_url
+                            or urljoin(base_url,img_parents["href"])  == base_url + "/home"
+                            or urljoin(base_url,img_parents["href"])  == base_url + "/home.html"
+                            or urljoin(base_url,img_parents["href"])  == base_url + "/index.html"
+                            or urljoin(base_url,img_parents["href"])  == base_url + "/index.php"
+                        ) :
+                            # print("url parent = " + urljoin(base_url,img_parents["href"  ]) + " vs " + base_url)
+                            arrayLogos2.append(Logo("url_has_link_in_parent_to_home", str(img), base_url))
+                        
+        
+
+        # fichiers externes
+
+        url_manifest = soup.find("link", rel="manifest")
+        if url_manifest:
+            # print("manifest ! ", urljoin(base_url, url_manifest['href']))
+            response_manifest = self.getHTTPResponse(urljoin(base_url, url_manifest['href']))
+            js = json.loads(response_manifest.content)
+            if "icons" in js:
+                for icon in js["icons"]:
+                    arrayLogos2.append(Logo("url_manifest_image", urljoin(base_url,icon["src"]), base_url))
+
+        for item in soup.findAll("link", type="application/rss+xml"):
+            try:
+                response_rss = self.getHTTPResponse(urljoin(base_url, item['href']))
+                soup_rss = BeautifulSoup(response_rss.content, 'lxml')
+                channel = soup_rss.find("channel")
+                image = channel.find("image")
+                url_rss_image = image.find("url").text
+                arrayLogos2.append(Logo("url_rss_image", url_rss_image, base_url))
+            except:
+                a=1
+
+
+        # json-ld
+        for item in soup.findAll('script', {'type':'application/ld+json'}):
+
+                tab_json=[]
+                # print(item)
+                try:
+                    x = json.loads("".join(item.contents))
+
+                    if type(x) == list:                 # un script json-ld peut contenir un array de json-ld
+                        for item in x:
+                            tab_json.append(item)
+                    else:
+                        tab_json.append(x)
+
+                    for item in tab_json:
+                        if "logo" in item:
+                            arrayLogos2.append(Logo("url_json_ld_logo", str(item['logo']), base_url))
+                except:
+                    a=1
+
+
+        # print(json.dumps(arrayLogos2))
+        return arrayLogos2
+
 
     def download_logos(self, arrayLogos):
         result_size = {}
