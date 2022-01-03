@@ -23,6 +23,7 @@ import base64
 import operator
 
 from .Logo import Logo
+from .Logos import Logos
 
 
 class LogoScrapper:
@@ -37,13 +38,14 @@ class LogoScrapper:
         self.last_url = None
         response         = self.getHTTPResponse(page)
         logos            = self.extractLogosFromHTTPResponse(response)
-        logos2           = self.extractLogosFromHTTPResponse2(response)
-        for logo in logos2:
-            print(logo.to_JSON())
-        # print(logos)
-
         logos_downloaded = self.download_logos(logos)
         logos_scored     = self.compute_scores(logos_downloaded)
+
+        logos2           = self.extractLogosFromHTTPResponse2(response)
+        logos2.download()
+        logos2.computeScore()
+        
+
         return logos_scored
 
 
@@ -175,10 +177,24 @@ class LogoScrapper:
         return dict
 
 
+    def appendLogosFromBS4Nodes(self, logos, nodes, type, base_url):
+        
+        for node in nodes:
+            try:
+                logo = Logo(type, str(node), base_url)
+                logos.append(logo)
+            except:
+                a=1
+                
+        return logos
+
+
+
     def extractLogosFromHTTPResponse(self,response):
         
         arrayLogos=[]
       
+             
         if response == None:
             return arrayLogos
 
@@ -337,8 +353,11 @@ class LogoScrapper:
 
     def extractLogosFromHTTPResponse2(self,response):
         
-        arrayLogos2 = []
+        # arrayLogos2 = []
+        
+        arrayLogos2 = Logos()
 
+        print(type(arrayLogos2))
         if response == None:
             return arrayLogos2
 
@@ -354,21 +373,24 @@ class LogoScrapper:
 
         # balises SEO
         
-        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("link", rel="icon") ,"url_favicon_html",  base_url )
-        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("link", rel="apple-touch-icon") ,"apple-touch-icon",  base_url )
-        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("meta", property="og:logo") ,"url_og_logo",  base_url )
-        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("meta", property="og:image"),"url_og_image",  base_url )
-        arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll("meta", property="twitter:image"),"url_twitter_image",  base_url )
+        # arrayLogosTest  = arrayLogosTest + self.extractLogosFromBS4Nodes(soup.findAll("link", rel="icon") ,"url_favicon_html",  base_url )
+        
+        arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2, soup.findAll("link", rel="icon") ,"url_favicon_html",  base_url )
+        arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll("link", rel="icon") ,"url_favicon_html",  base_url )
+        arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll("link", rel="apple-touch-icon") ,"apple-touch-icon",  base_url )
+        arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll("meta", property="og:logo") ,"url_og_logo",  base_url )
+        arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll("meta", property="og:image"),"url_og_image",  base_url )
+        arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll("meta", property="twitter:image"),"url_twitter_image",  base_url )
 
         # img et/ou svg
 
         tags_images =["img", "svg"]
         for tag in tags_images:
         
-            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, {"src":    re.compile("(?i).*logo.*")}) ,"url_src_contains_logo",  base_url )
-            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, {"class" : re.compile('(?i).*logo.*')}) ,"class_contains_logo",  base_url )
-            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, {"alt" : re.compile('(?i).*logo.*')})   ,"alt_contains_logo",  base_url )
-            arrayLogos2 = arrayLogos2 + self.extractLogosFromBS4Nodes(soup.findAll(tag, itemprop="logo")                        ,"url_schema_org",  base_url )
+            arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll(tag, {"src":    re.compile("(?i).*logo.*")}) ,"url_src_contains_logo",  base_url )
+            arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll(tag, {"class" : re.compile('(?i).*logo.*')}) ,"class_contains_logo",  base_url )
+            arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll(tag, {"alt" : re.compile('(?i).*logo.*')})   ,"alt_contains_logo",  base_url )
+            arrayLogos2 = self.appendLogosFromBS4Nodes(arrayLogos2,soup.findAll(tag, itemprop="logo")                        ,"url_schema_org",  base_url )
 
 
             for img in soup.findAll(tag):
@@ -449,7 +471,6 @@ class LogoScrapper:
                     a=1
 
 
-        # print(json.dumps(arrayLogos2))
         return arrayLogos2
 
 
