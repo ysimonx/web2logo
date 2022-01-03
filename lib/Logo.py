@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from io import BytesIO
 from cairosvg import svg2png
+import re
+import base64
 
 class Logo:
 
@@ -19,16 +21,15 @@ class Logo:
 
         self.useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
        
-
         self.findURLFromTypeAndTag()
-        # self.download()
 
         self.last_status_code = None
         self.size = None
         self.last_image_error = None
         self.img = None
+        self.score = 0
+        self.score_rules = ""
         
-
     def findURLFromTypeAndTag(self):
         url = None
         # print ("type = ", self.type)
@@ -76,11 +77,9 @@ class Logo:
         url = urljoin(self.base_url,url)
 
         # print("url = ", url)
-        self.url = url
-            
-                   
+        self.url = url                      
 
-    def to_JSON(self):
+    def toJSON(self):
         return {
                     'image':
                         {
@@ -88,7 +87,9 @@ class Logo:
                             'url': self.url,
                             'tag': self.tag,
                             'base_url': self.base_url,
-                            'last_status_coded': self.last_status_code
+                            'last_status_coded': self.last_status_code,
+                            'score': self.score,
+                            'score_rules': self.score_rules
                         }
                 }
 
@@ -96,10 +97,18 @@ class Logo:
 
         self.img = None
 
+        # ---- INLINE -----
+        if self.url.startswith("data:"):
+            contentbase64= re.sub("data:image\/[^,]+,","",self.url)
+            image_downloaded = Image.open(BytesIO(base64.b64decode(contentbase64)))
+            self.img = image_downloaded
+            return self
+
         if self.url.startswith('<svg'):
             self.img = self.convertSVGtoImage(self.url)
             return self
         
+        # ---- EXTERNAL -----
         headers = {
             "User-Agent": self.useragent
         }
@@ -131,8 +140,7 @@ class Logo:
             self.last_image_error = "requests.exceptions.RequestException : %s" % (e) 
             
         return self
-                    
-                    
+                                      
     def convertSVGtoImage(self, text):
         try:
             svgsoup = BeautifulSoup(text, features="html.parser")
