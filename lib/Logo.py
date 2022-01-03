@@ -20,8 +20,8 @@ class Logo:
         self.useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
        
 
-        self.findURL()
-        self.download()
+        self.findURLFromTypeAndTag()
+        # self.download()
 
         self.last_status_code = None
         self.size = None
@@ -29,7 +29,7 @@ class Logo:
         self.img = None
         
 
-    def findURL(self):
+    def findURLFromTypeAndTag(self):
         url = None
         # print ("type = ", self.type)
         if self.type in [
@@ -106,7 +106,7 @@ class Logo:
         
         try:
             response = requests.get(self.url, headers=headers)
-            print("response status code = ", response.status_code)
+            # print("response status code = ", response.status_code)
             self.last_status_code = response.status_code
             
             if response.status_code == 200:
