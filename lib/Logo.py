@@ -15,25 +15,26 @@ import base64
 class Logo:
 
     def __init__(self, type, tag, base_url):
-        self.type = type
-        self.tag = tag
-        self.base_url = base_url
+        self.type       = type
+        self.tag        = tag
+        self.base_url   = base_url
 
-        self.useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
-       
         self.findURLFromTypeAndTag()
 
-        self.last_status_code = None
-        self.size = None
-        self.last_image_error = None
-        self.img = None
-        self.score = 0
-        self.score_rules = ""
-        self.isSVG = False
+        self.last_status_code   = None
+        self.size               = None
+        self.last_image_error   = None
+        self.img                = None
+        self.score              = 0
+        self.score_rules        = ""
+        self.isSVG              = False
+
+        self.useragent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
+       
         
     def findURLFromTypeAndTag(self):
         url = None
-        # print ("type = ", self.type)
+        
         if self.type in [
                             "url_favicon_html",
                             "apple-touch-icon"
