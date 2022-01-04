@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 import array
+import operator
 from .Logo import Logo
 
 class CustomLogoError(Exception):
@@ -60,8 +61,7 @@ class Logos(list):
 
         for i in range(len(self)):
             logo = self.__getitem__(i)
-            print(logo.toJSON())
-
+            
             if logo.img:
                 
                 score = scores[logo.type]
@@ -76,8 +76,8 @@ class Logos(list):
                     result_scores[url] = score * 10
                     result_rules[url] = logo.type + " (+" + str(score) + ")"
         
-        print(result_scores)
-        # dedoublonne
+        
+        # dedoublonne 
         result_dict= dict()
         for i in range(len(self)):
             logo = self.__getitem__(i)
@@ -100,8 +100,45 @@ class Logos(list):
         results=[]
         for key in result_dict:
             results.append(result_dict[key])
-        print("-----------------")
-        print(results)
+        
+         # pondere score en fonction des dimensions
+        result_pondere = []
+        for item in results:
+            if item.size:
+                width, height= item.size
+              
+                if width<32 or height<32:
+                    item.score = item.score / 2
+                    item.score_rules = item.score_rules + " | " + "/2 because < 32px "
+                if width<80 or height<80:
+                    item.score = item.score / 2
+                    item.score_rules = item.score_rules + " | " + "/2 because < 80px "
+                if width >130 or height >130:
+                    item.score = item.score * 2
+                    item.score_rules = item.score_rules + " | " + "*2 because > 130px "
+                if width >300 or height >300:
+                    item.score = item.score * 2
+                    item.score_rules = item.score_rules + " | " + "*2 because > 300px "
+            else:
+                item.score = 0
 
-        for result in results:
+         
+            if item.isSVG and not item.url.startswith("http") and len(item.tag) > 2000:
+                item.score = item.score * 2
+                item.score_rules = item.score_rules + " | " + "*2 because is_svg and large inline"
+            if item.isSVG and item.url.startswith("http"):
+                item.score = item.score * 4
+                item.score_rules = item.score_rules + " | " + "*4 because is_svg and external"
+            #    
+           
+            result_pondere.append(item)
+
+        # tri desc
+        # result_scores_sorted = sorted(result_pondere, key=operator.itemgetter("score"), reverse=True)
+        result_scores_sorted = sorted(result_pondere, key=lambda x: x.score, reverse=True)
+
+        print("-------------------------------")
+        for result in result_scores_sorted:
             print(result.toJSON())
+
+        return result_scores_sorted

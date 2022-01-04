@@ -1,5 +1,4 @@
 {
-    "logo": "https://www.ldlc.com/v4/img/common/LDLC-logo.gif",
     "logos": [
         {
             "image": {
@@ -8,18 +7,33 @@
             },
             "width": 400,
             "height": 160,
-            "score": 400,
-            "score_rules": "url_json_ld_logo (+10) | *2 because > 130px  | *2 because > 300px "
+            "score": 2160,
+            "score_rules": "url_og_image (+2) | url_src_contains_logo (+2) | url_json_ld_logo (+50) | *2 because > 130px  | *2 because > 300px ",
+            "count": 1
+        },
+        {
+            "image": {
+                "type": "url_has_link_in_parent_to_home",
+                "url": "https://media.ldlc.com/cms/2021-12/LDLC-logo_1.gif",
+                "tag": "<img alt=\"LDLC\" src=\"https://media.ldlc.com/cms/2021-12/LDLC-logo_1.gif\"/>"
+            },
+            "width": 400,
+            "height": 160,
+            "score": 440,
+            "score_rules": "url_src_contains_logo (+2) | url_class_logo_in_parents (+3) | url_has_header_in_parents (+1) | url_has_link_in_parent_to_home (+5) | *2 because > 130px  | *2 because > 300px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "apple-touch-icon",
-                "url": "https://www.ldlc.com/v4/img/common/favicon/apple-touch-icon.png"
+                "url": "https://www.ldlc.com/v4/img/common/favicon/apple-touch-icon.png",
+                "tag": "<link href=\"/v4/img/common/favicon/apple-touch-icon.png\" rel=\"apple-touch-icon\" sizes=\"180x180\"/>"
             },
             "width": 180,
             "height": 180,
             "score": 80,
-            "score_rules": "apple-touch-icon (+4) | *2 because > 130px "
+            "score_rules": "apple-touch-icon (+4) | *2 because > 130px ",
+            "count": 1
         },
         {
             "image": {
@@ -27,7 +41,8 @@
                 "url": "https://www.ldlc.com/android-chrome-192x192.png"
             },
             "score": 50,
-            "score_rules": "url_manifest_image (+5)"
+            "score_rules": "url_manifest_image (+5)",
+            "count": 1
         },
         {
             "image": {
@@ -35,167 +50,189 @@
                 "url": "https://www.ldlc.com/android-chrome-512x512.png"
             },
             "score": 50,
-            "score_rules": "url_manifest_image (+5)"
-        },
-        {
-            "image": {
-                "type": "url_has_link_in_parents",
-                "url": "https://media.ldlc.com/cms/2021-11/LDLC-logo_noel21.gif"
-            },
-            "width": 400,
-            "height": 160,
-            "score": 40,
-            "score_rules": "url_has_link_in_parents (+1) | *2 because > 130px  | *2 because > 300px "
+            "score_rules": "url_manifest_image (+5)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/mkt/ldlc/fr/odr/generique.jpg"
+                "url": "https://media.ldlc.com/mkt/ldlc/fr/odr/generique.jpg",
+                "tag": "<img alt=\"Les bons plans des marques\" data-entity-type=\"\" data-entity-uuid=\"\" height=\"150\" loading=\"lazy\" src=\"https://media.ldlc.com/mkt/ldlc/fr/odr/generique.jpg\" width=\"285\"/>"
             },
             "width": 285,
             "height": 150,
             "score": 20,
-            "score_rules": "url_has_header_in_parents (+1) | *2 because > 130px "
+            "score_rules": "url_has_header_in_parents (+1) | *2 because > 130px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/2018-12/coin-affaire_0.jpg"
+                "url": "https://media.ldlc.com/cms/2018-12/coin-affaire_0.jpg",
+                "tag": "<img alt=\"coin des affaires\" data-entity-type=\"\" data-entity-uuid=\"\" height=\"150\" loading=\"lazy\" src=\"https://media.ldlc.com/cms/2018-12/coin-affaire_0.jpg\" width=\"285\"/>"
             },
             "width": 285,
             "height": 150,
             "score": 20,
-            "score_rules": "url_has_header_in_parents (+1) | *2 because > 130px "
+            "score_rules": "url_has_header_in_parents (+1) | *2 because > 130px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_favicon_html",
-                "url": "https://www.ldlc.com/v4/img/common/favicon/favicon-32x32.png"
+                "url": "https://www.ldlc.com/v4/img/common/favicon/favicon-32x32.png",
+                "tag": "<link href=\"/v4/img/common/favicon/favicon-32x32.png\" rel=\"icon\" sizes=\"32x32\" type=\"image/png\"/>"
             },
             "width": 32,
             "height": 32,
             "score": 15.0,
-            "score_rules": "url_favicon_html (+3) | /2 because < 80px "
-        },
-        {
-            "image": {
-                "type": "url_favicon_html",
-                "url": "https://www.ldlc.com/v4/img/common/favicon/favicon-16x16.png"
-            },
-            "width": 16,
-            "height": 16,
-            "score": 15.0,
-            "score_rules": "url_favicon_html (+3) | /2 because < 80px "
+            "score_rules": "url_favicon_html (+3) | /2 because < 80px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_src_contains_logo",
-                "url": "https://media.ldlc.com/cms/2018-05/logo-jpdc_0.png"
+                "url": "https://media.ldlc.com/cms/2018-05/logo-jpdc_0.png",
+                "tag": "<img alt=\"J'ai plus de croquettes\" loading=\"lazy\" src=\"https://media.ldlc.com/cms/2018-05/logo-jpdc_0.png\"/>"
             },
             "width": 130,
             "height": 38,
             "score": 10.0,
-            "score_rules": "url_src_contains_logo (+2) | /2 because < 80px "
+            "score_rules": "url_src_contains_logo (+2) | /2 because < 80px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-informatique.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-informatique.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-informatique.png\">Informatique<span class=\"icon icon-arrow-right-extrabold\">\u00a0</span></img>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-image-son.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-image-son.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-image-son.png\"/>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-telephonie-auto.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-telephonie-auto.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-telephonie-auto.png\"/>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-jeux-loisirs.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-jeux-loisirs.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-jeux-loisirs.png\"/>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-objet-connectes.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-objet-connectes.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-objet-connectes.png\"/>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-consommable.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-consommable.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-consommable.png\"/>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-connectique.png"
+                "url": "https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-connectique.png",
+                "tag": "<img alt=\"\" class=\"picto\" data-entity-type=\"\" data-entity-uuid=\"\" src=\"https://media.ldlc.com/cms/LDLC_com/pictos_menu/picto-connectique.png\"/>"
             },
             "width": 100,
             "height": 100,
             "score": 10,
-            "score_rules": "url_has_header_in_parents (+1)"
+            "score_rules": "url_has_header_in_parents (+1)",
+            "count": 1
+        },
+        {
+            "image": {
+                "type": "url_favicon_html",
+                "url": "https://www.ldlc.com/v4/img/common/favicon/favicon-16x16.png",
+                "tag": "<link href=\"/v4/img/common/favicon/favicon-16x16.png\" rel=\"icon\" sizes=\"16x16\" type=\"image/png\"/>"
+            },
+            "width": 16,
+            "height": 16,
+            "score": 7.5,
+            "score_rules": "url_favicon_html (+3) | /2 because < 32px  | /2 because < 80px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/r50/ld/products/00/03/94/75/LD0003947582_2.jpg"
+                "url": "https://media.ldlc.com/r50/ld/products/00/03/94/75/LD0003947582_2.jpg",
+                "tag": "<img alt=\"Sennheiser HD 599\" height=\"50\" src=\"https://media.ldlc.com/r50/ld/products/00/03/94/75/LD0003947582_2.jpg\"/>"
             },
             "width": 50,
             "height": 50,
             "score": 5.0,
-            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px "
+            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/r50/ld/products/00/04/27/93/LD0004279343_2.jpg"
+                "url": "https://media.ldlc.com/r50/ld/products/00/04/81/78/LD0004817898_2.jpg",
+                "tag": "<img alt=\"Arlo Go VML4030\" height=\"50\" src=\"https://media.ldlc.com/r50/ld/products/00/04/81/78/LD0004817898_2.jpg\"/>"
             },
             "width": 50,
             "height": 50,
             "score": 5.0,
-            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px "
+            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px ",
+            "count": 1
         },
         {
             "image": {
                 "type": "url_has_header_in_parents",
-                "url": "https://media.ldlc.com/r50/ld/products/00/04/56/19/LD0004561946_2.jpg"
+                "url": "https://media.ldlc.com/r50/ld/products/00/05/51/67/LD0005516784_2.jpg",
+                "tag": "<img alt=\"Arlo Pro 3 - Blanc (VMS4340P)\" height=\"50\" src=\"https://media.ldlc.com/r50/ld/products/00/05/51/67/LD0005516784_2.jpg\"/>"
             },
             "width": 50,
             "height": 50,
             "score": 5.0,
-            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px "
+            "score_rules": "url_has_header_in_parents (+1) | /2 because < 80px ",
+            "count": 1
         }
-    ]
+    ],
+    "url": "https://www.ldlc.com/"
 }

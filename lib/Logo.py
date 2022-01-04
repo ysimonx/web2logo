@@ -29,6 +29,7 @@ class Logo:
         self.img = None
         self.score = 0
         self.score_rules = ""
+        self.isSVG = False
         
     def findURLFromTypeAndTag(self):
         url = None
@@ -89,13 +90,18 @@ class Logo:
                             'base_url': self.base_url,
                             'last_status_coded': self.last_status_code,
                             'score': self.score,
-                            'score_rules': self.score_rules
+                            'score_rules': self.score_rules,
+                            'size': self.size,
+                            'is_svg': self.isSVG
                         }
                 }
 
-    def setIMG(self, image):
-        self.img = image
+    def setIMG(self, pil_img):
+        self.img = pil_img
+        self.size = pil_img.size
         return self
+
+
 
     def download(self):
 
@@ -109,6 +115,7 @@ class Logo:
             return self
 
         if self.url.startswith('<svg'):
+            self.isSVG=True
             self.setIMG(self.convertSVGtoImage(self.url))
             return self
         
@@ -126,6 +133,7 @@ class Logo:
                 if ('<svg' in str(response.content)):
                     # print("contains svg xml")
                     # print(response.content)
+                    self.isSVG=True
                     self.setIMG(self.convertSVGtoImage(response.content))
                     return self
                 image_bytes = io.BytesIO(response.content)
