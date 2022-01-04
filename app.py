@@ -34,11 +34,18 @@ def find_logo(domain):
     logoScrapper =  LogoScrapper();
     logos = logoScrapper.getLogosFromPage(page)
 
-    result= {
-            "logos": logos,
-            "url": logoScrapper.last_url
-    }
+    result_logos = []
+
+    for i in range(len(logos.sorted_logo)): 
+        logo = logos.sorted_logo.__getitem__(i)
+        result_logos.append(logo.toJSON())
     
+
+    result= {
+            "logos": result_logos,
+
+    }
+     
     with open('./var/%s.json' % (domain), 'w') as outfile:
         json.dump(result, outfile, indent=4)
 
@@ -46,12 +53,12 @@ def find_logo(domain):
     if len(logos) > 0:
         if not request.args.get('debug'): 
             img_io = BytesIO()
-            pil_img = logoScrapper.getImageFromTag(logos[0]["image"]["url"])
-            print(logos[0]["image"]["url"])
+            logo = logos.sorted_logo[0]
+            pil_img = logo.img
             pil_img.convert('RGB').save(img_io, 'JPEG', quality=70)
             img_io.seek(0)
             return send_file(img_io, mimetype='image/jpeg')
-   
+            
 
     response = app.response_class(
         response=json.dumps(result, indent=4),

@@ -17,6 +17,7 @@ class CustomLogoError(Exception):
 class Logos(list):
     def __init__(self, *args):
         super().__init__(self, *args)
+        self.sorted_logo = []
 
     def download(self):
         print("downloading Logos...")
@@ -29,6 +30,13 @@ class Logos(list):
         if not isinstance(element, Logo):
             raise CustomLogoError(self, element)
         return super(Logos, self).append(element)
+
+    def toJSONArray(self):
+        result = []
+        for i in range(len(self)): 
+            logo = self.__getitem__(i)
+            result.append(logo.toJSON())
+        return result
 
     def computeScore(self):
         print("computing scores...")
@@ -137,8 +145,9 @@ class Logos(list):
         # result_scores_sorted = sorted(result_pondere, key=operator.itemgetter("score"), reverse=True)
         result_scores_sorted = sorted(result_pondere, key=lambda x: x.score, reverse=True)
 
-        print("-------------------------------")
-        for result in result_scores_sorted:
-            print(result.toJSON())
+        # print("-------------------------------")
+        # for result in result_scores_sorted:
+        #     print(result.toJSON())
 
-        return result_scores_sorted
+        self.sorted_logo = result_scores_sorted
+        return self

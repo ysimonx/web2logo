@@ -74,8 +74,8 @@ class Logo:
     
         if url == None:
             url = self.tag
-
-        url = urljoin(self.base_url,url)
+        else:
+            url = urljoin(self.base_url,url)
 
         # print("url = ", url)
         self.url = url                      
@@ -165,6 +165,14 @@ class Logo:
                 x1 = int(float(x1))
                 y1 = int(float(y1))
 
+                # because of  <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 768 300" class="hide-on-desktop"> on decitre.fr
+                if "width" in svg.attrs:
+                    del svg.attrs['width']
+                if "height" in svg.attrs:
+                    del svg.attrs['height']
+
+                text = str(svg)
+
             else:
                 if svg.has_attr("height") and svg.has_attr("width"):
                     x0=0
@@ -181,7 +189,7 @@ class Logo:
                 png = svg2png(bytestring=bytes(text, 'utf-8'),parent_width=int(x1)-int(x0), parent_height=int(y1)-int(y0))
 
             pil_img = Image.open(BytesIO(png))
-
+            
 
             new_image = Image.new("RGBA", pil_img.size, "#808080") # Create a white rgba background
             new_image.paste(pil_img, (0, 0), pil_img)              # Paste the image on the background. Go to the links given below for details.
