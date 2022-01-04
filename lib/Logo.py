@@ -93,6 +93,10 @@ class Logo:
                         }
                 }
 
+    def setIMG(self, image):
+        self.img = image
+        return self
+
     def download(self):
 
         self.img = None
@@ -101,11 +105,11 @@ class Logo:
         if self.url.startswith("data:"):
             contentbase64= re.sub("data:image\/[^,]+,","",self.url)
             image_downloaded = Image.open(BytesIO(base64.b64decode(contentbase64)))
-            self.img = image_downloaded
+            self.setIMG(image_downloaded)
             return self
 
         if self.url.startswith('<svg'):
-            self.img = self.convertSVGtoImage(self.url)
+            self.setIMG(self.convertSVGtoImage(self.url))
             return self
         
         # ---- EXTERNAL -----
@@ -122,11 +126,11 @@ class Logo:
                 if ('<svg' in str(response.content)):
                     # print("contains svg xml")
                     # print(response.content)
-                    return self.convertSVGtoImage(response.content)
-
+                    self.setIMG(self.convertSVGtoImage(response.content))
+                    return self
                 image_bytes = io.BytesIO(response.content)
                 img = Image.open(image_bytes)
-                self.img = img
+                self.setIMG(img)
 
                 
         except requests.exceptions.Timeout:
@@ -175,8 +179,7 @@ class Logo:
             new_image.paste(pil_img, (0, 0), pil_img)              # Paste the image on the background. Go to the links given below for details.
             new_image.convert('RGB').save('test.jpg', "JPEG")  # Save as JPEG
 
-            self.img = new_image
             return new_image
         except:
-            self.img = None
+            
             return None
